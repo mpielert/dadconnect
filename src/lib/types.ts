@@ -157,3 +157,25 @@ export const HOSTING_REQ_STATUS_TONE: Record<
   declined: "cardinal",
   countered: "neutral",
 };
+
+// ---------------------------------------------------------------------------
+// Travel Sharing
+// ---------------------------------------------------------------------------
+export interface TravelPost {
+  post_id: string;
+  author_id: string;
+  destination_city: string;
+  start_date: string | null;
+  end_date: string | null;
+  highlights: string;
+  has_photos: boolean;
+  created_at: string;
+}
+
+export interface TravelReply {
+  reply_id: string;
+  post_id: string;
+  author_id: string;
+  message: string;
+  created_at: string;
+}

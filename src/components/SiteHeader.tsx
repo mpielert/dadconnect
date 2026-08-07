@@ -6,7 +6,7 @@ export function SiteHeader({
   active,
 }: {
   memberName: string;
-  active?: "directory" | "career" | "crash-pads" | "profile";
+  active?: "directory" | "career" | "crash-pads" | "travel" | "profile";
 }) {
   const linkCls = (isActive: boolean) =>
     `rounded-lg px-3 py-1.5 text-sm transition ${
@@ -35,6 +35,9 @@ export function SiteHeader({
             className={linkCls(active === "crash-pads")}
           >
             Crash Pads
+          </Link>
+          <Link href="/travel" className={linkCls(active === "travel")}>
+            Travel
           </Link>
           <Link href="/profile" className={linkCls(active === "profile")}>
             My profile
