@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -12,11 +13,39 @@ import { createClient } from "@/lib/supabase/client";
  * emails — see README "Auth configuration".
  */
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle",
   );
   const [message, setMessage] = useState("");
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
+
+  async function handlePasskey() {
+    setPasskeyBusy(true);
+    setMessage("");
+    setStatus("idle");
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPasskey();
+
+    if (error) {
+      // Most common case: no passkey saved on this device yet — email is the
+      // way in, and enrolling happens after sign-in.
+      setStatus("error");
+      setMessage(
+        error.message?.toLowerCase().includes("not allowed") ||
+          error.name === "NotAllowedError"
+          ? "No passkey found on this device. Sign in with your email below — you can turn on Face ID afterwards."
+          : error.message,
+      );
+      setPasskeyBusy(false);
+      return;
+    }
+
+    router.push("/directory");
+    router.refresh();
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,10 +81,28 @@ export default function LoginPage() {
           Sign in
         </h1>
         <p className="mt-2 text-sm text-ink-soft">
-          We&apos;ll email you a one-time sign-in link.
+          Use Face ID if you&apos;ve set it up, or we&apos;ll email you a
+          one-time sign-in link.
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <button
+          type="button"
+          onClick={handlePasskey}
+          disabled={passkeyBusy}
+          className="mt-6 w-full rounded-lg border border-cardinal/60 px-4 py-3 font-medium text-cardinal transition hover:bg-cardinal hover:text-paper disabled:opacity-50"
+        >
+          {passkeyBusy ? "Waiting…" : "Sign in with Face ID / passkey"}
+        </button>
+
+        <div className="my-5 flex items-center gap-3">
+          <span className="h-px flex-1 bg-thread/40" />
+          <span className="font-mono text-[10px] uppercase tracking-wider text-thread">
+            or
+          </span>
+          <span className="h-px flex-1 bg-thread/40" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
             required

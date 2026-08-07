@@ -4,6 +4,7 @@ import { getCurrentMember } from "@/lib/members";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ProfileEditor } from "./ProfileEditor";
 import { MinorsManager } from "./MinorsManager";
+import { PasskeySetup } from "./PasskeySetup";
 import type { Member } from "@/lib/types";
 
 export default async function ProfilePage() {
@@ -32,6 +33,10 @@ export default async function ProfilePage() {
 
         <section className="mt-6 rounded-2xl border border-thread/40 bg-paper-raised p-6">
           <ProfileEditor member={me} />
+        </section>
+
+        <section className="mt-8">
+          <PasskeySetup />
         </section>
 
         <section className="mt-10">
