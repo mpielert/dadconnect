@@ -1,0 +1,28 @@
+# Supabase CLI config. `project_id` is just a local label; the real project is
+# bound with `supabase link --project-ref <ref>`.
+project_id = "dadconnect"
+
+[db]
+port = 54322
+major_version = 15
+
+[db.migrations]
+schema_paths = []
+
+[auth]
+# Invite-only: NEVER enable open signups (Handoff §2, §7).
+enable_signup = false
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+
+[auth.email]
+enable_signup = false
+enable_confirmations = true
+
+[api]
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+
+[studio]
+port = 54323

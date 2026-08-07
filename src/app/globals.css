@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens from the prototypes (Handoff §5). Kept as CSS variables too,
+   so non-Tailwind contexts (e.g. raw SVG motifs) can reference them. */
+:root {
+  --ink: #202a26;
+  --ink-soft: #4b5850;
+  --paper: #eae3d3;
+  --paper-raised: #f1ecde;
+  --cardinal: #9c2b2f;
+  --brass: #ad8a4e;
+  --thread: #8c9a8f;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Signature "thread" crossing-hairline motif from the prototype headers.
+   Apply with the .thread-bg utility. */
+.thread-bg {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 22px,
+      rgba(140, 154, 143, 0.14) 22px,
+      rgba(140, 154, 143, 0.14) 23px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 22px,
+      rgba(140, 154, 143, 0.14) 22px,
+      rgba(140, 154, 143, 0.14) 23px
+    );
+}
