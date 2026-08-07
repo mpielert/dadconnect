@@ -96,3 +96,64 @@ export const CAREER_STATUS_TONE: Record<
   declined: "cardinal",
   redirected: "neutral",
 };
+
+// ---------------------------------------------------------------------------
+// Crash Pads
+// ---------------------------------------------------------------------------
+export type HostStatus = "yes" | "maybe" | "no";
+export type HostingRequestStatus =
+  | "pending"
+  | "accepted"
+  | "declined"
+  | "countered";
+
+export interface HostingStatus {
+  member_id: string;
+  status: HostStatus;
+  constraints: string | null;
+  updated_at: string;
+}
+
+export interface HostingRequest {
+  request_id: string;
+  traveler_id: string;
+  host_id: string;
+  city: string;
+  start_date: string | null;
+  end_date: string | null;
+  headcount: number | null;
+  context: string | null;
+  status: HostingRequestStatus;
+  counter_note: string | null;
+  created_at: string;
+}
+
+export const HOST_STATUS_LABEL: Record<HostStatus, string> = {
+  yes: "Hosting",
+  maybe: "Maybe",
+  no: "Not hosting",
+};
+
+export const HOST_STATUS_TONE: Record<HostStatus, "thread" | "brass" | "neutral"> =
+  {
+    yes: "thread",
+    maybe: "brass",
+    no: "neutral",
+  };
+
+export const HOSTING_REQ_STATUS_LABEL: Record<HostingRequestStatus, string> = {
+  pending: "Pending",
+  accepted: "Accepted",
+  declined: "Declined",
+  countered: "Countered",
+};
+
+export const HOSTING_REQ_STATUS_TONE: Record<
+  HostingRequestStatus,
+  "brass" | "thread" | "cardinal" | "neutral"
+> = {
+  pending: "brass",
+  accepted: "thread",
+  declined: "cardinal",
+  countered: "neutral",
+};

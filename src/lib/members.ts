@@ -1,5 +1,20 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Member } from "./types";
+import type { DirectoryMember, Member } from "./types";
+
+/** member_id → masked directory row (name, city, etc.), through the RLS view. */
+export async function getDirectoryMap(): Promise<Map<string, DirectoryMember>> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("member_directory")
+    .select(
+      "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id",
+    );
+  const map = new Map<string, DirectoryMember>();
+  for (const row of (data as DirectoryMember[] | null) ?? []) {
+    map.set(row.member_id, row);
+  }
+  return map;
+}
 
 /**
  * member_id → display name, resolved through the RLS directory view. Used by
