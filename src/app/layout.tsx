@@ -22,8 +22,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DadConnect",
-  description: "A private directory and hub for the DadConnect group.",
+  title: "CMUDadConnect",
+  description: "A private directory and hub for the CMUDadConnect group.",
 };
 
 export default function RootLayout({

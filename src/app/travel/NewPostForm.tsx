@@ -60,10 +60,9 @@ export function NewPostForm() {
         />
       </div>
 
-      <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-soft">
-        <input type="checkbox" name="has_photos" className="h-4 w-4 accent-cardinal" />
-        I have a few photos to share (upload coming later)
-      </label>
+      <p className="text-sm text-ink-soft">
+        Post first, then add photos to it from the feed below.
+      </p>
 
       <div className="flex items-center gap-4">
         <SubmitButton pendingLabel="Posting…">Share trip</SubmitButton>

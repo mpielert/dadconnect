@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember } from "@/lib/members";
-import { bool, str, type ActionState } from "@/lib/form";
+import { str, type ActionState } from "@/lib/form";
 
 /** Share a trip post. */
 export async function createPost(
@@ -27,7 +27,8 @@ export async function createPost(
     start_date: str(formData, "start_date"),
     end_date: str(formData, "end_date"),
     highlights,
-    has_photos: bool(formData, "has_photos"),
+    // has_photos is now derived from actual uploads (travel_photos); the
+    // column stays for compatibility but is no longer set by hand.
   });
 
   if (error) return { ok: false, error: error.message };

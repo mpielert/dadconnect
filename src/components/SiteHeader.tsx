@@ -20,7 +20,7 @@ export function SiteHeader({
       <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-4">
         <Link href="/directory" className="leading-none">
           <span className="font-mono text-xs uppercase tracking-[0.25em] text-brass">
-            DadConnect
+            CMUDadConnect
           </span>
         </Link>
         <nav className="flex items-center gap-1">

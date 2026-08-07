@@ -46,7 +46,7 @@ export default function LoginPage() {
     <main className="thread-bg flex min-h-screen flex-col items-center justify-center px-6">
       <div className="w-full max-w-sm rounded-2xl border border-thread/40 bg-paper-raised px-8 py-10 shadow-sm">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-brass">
-          DadConnect
+          CMUDadConnect
         </p>
         <h1 className="mt-3 font-display text-2xl font-semibold text-ink">
           Sign in

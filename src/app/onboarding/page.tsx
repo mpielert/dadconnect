@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
     <main className="thread-bg min-h-screen px-6 py-10">
       <div className="mx-auto max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-brass">
-          DadConnect
+          CMUDadConnect
         </p>
         <h1 className="mt-2 font-display text-3xl font-semibold text-ink">
           Welcome — set up your profile

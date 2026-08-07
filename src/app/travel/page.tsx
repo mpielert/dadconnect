@@ -6,7 +6,10 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Pill } from "@/components/Pill";
 import { NewPostForm } from "./NewPostForm";
 import { ReplyForm } from "./ReplyForm";
+import { PhotoUploader } from "./PhotoUploader";
 import type { HostingStatus, TravelPost, TravelReply } from "@/lib/types";
+
+type PhotoRow = { photo_id: string; post_id: string; storage_path: string };
 
 const norm = (s: string) => s.trim().toLowerCase();
 
@@ -21,19 +24,48 @@ export default async function TravelPage() {
   if (!me) redirect("/onboarding");
 
   const supabase = await createClient();
-  const [{ data: postData }, { data: replyData }, { data: hostData }, dir] =
-    await Promise.all([
-      supabase
-        .from("travel_posts")
-        .select("*")
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("travel_replies")
-        .select("*")
-        .order("created_at", { ascending: true }),
-      supabase.from("hosting_status").select("*").in("status", ["yes", "maybe"]),
-      getDirectoryMap(),
-    ]);
+  const [
+    { data: postData },
+    { data: replyData },
+    { data: hostData },
+    { data: photoData },
+    dir,
+  ] = await Promise.all([
+    supabase
+      .from("travel_posts")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("travel_replies")
+      .select("*")
+      .order("created_at", { ascending: true }),
+    supabase.from("hosting_status").select("*").in("status", ["yes", "maybe"]),
+    supabase
+      .from("travel_photos")
+      .select("photo_id,post_id,storage_path")
+      .order("created_at", { ascending: true }),
+    getDirectoryMap(),
+  ]);
+
+  // The bucket is private — mint short-lived signed URLs for rendering.
+  const photos = (photoData as PhotoRow[] | null) ?? [];
+  const photosByPost = new Map<string, { id: string; url: string }[]>();
+  if (photos.length) {
+    const { data: signed } = await supabase.storage
+      .from("travel-photos")
+      .createSignedUrls(
+        photos.map((p) => p.storage_path),
+        60 * 60, // 1 hour
+      );
+    photos.forEach((p, i) => {
+      const url = signed?.[i]?.signedUrl;
+      if (!url) return;
+      photosByPost.set(p.post_id, [
+        ...(photosByPost.get(p.post_id) ?? []),
+        { id: p.photo_id, url },
+      ]);
+    });
+  }
 
   const posts = (postData as TravelPost[] | null) ?? [];
   const replies = (replyData as TravelReply[] | null) ?? [];
@@ -83,6 +115,8 @@ export default async function TravelPage() {
               const range = dateRange(post.start_date, post.end_date);
               const hosts = hostsByCity.get(norm(post.destination_city)) ?? [];
               const postReplies = repliesByPost.get(post.post_id) ?? [];
+              const postPhotos = photosByPost.get(post.post_id) ?? [];
+              const isAuthor = post.author_id === me.member_id;
 
               return (
                 <article
@@ -99,12 +133,40 @@ export default async function TravelPage() {
                         {range ? ` · ${range}` : ""}
                       </p>
                     </div>
-                    {post.has_photos && <Pill tone="brass">Photos</Pill>}
+                    {postPhotos.length > 0 && (
+                      <Pill tone="brass">
+                        {postPhotos.length} photo
+                        {postPhotos.length === 1 ? "" : "s"}
+                      </Pill>
+                    )}
                   </div>
 
                   <p className="mt-3 whitespace-pre-line text-ink">
                     {post.highlights}
                   </p>
+
+                  {postPhotos.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                      {postPhotos.map((ph) => (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          key={ph.id}
+                          src={ph.url}
+                          alt={`From ${post.destination_city}`}
+                          loading="lazy"
+                          className="aspect-square w-full rounded-lg border border-thread/40 object-cover"
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {isAuthor && (
+                    <PhotoUploader
+                      postId={post.post_id}
+                      memberId={me.member_id}
+                      existingCount={postPhotos.length}
+                    />
+                  )}
 
                   {hosts.length > 0 && (
                     <Link

@@ -16,7 +16,7 @@ export default async function Home() {
     <main className="thread-bg flex min-h-screen flex-col items-center justify-center px-6 text-center">
       <div className="max-w-xl rounded-2xl border border-thread/40 bg-paper-raised px-8 py-12 shadow-sm">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-brass">
-          DadConnect
+          CMUDadConnect
         </p>
         <h1 className="mt-4 font-display text-4xl font-semibold text-ink">
           The private hub for our group.
