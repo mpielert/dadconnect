@@ -40,7 +40,7 @@ export default async function HostingRequestsPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="crash-pads" unread={unread} />
+      <SiteHeader memberName={me.name} active="crash-pads" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <Link
           href="/crash-pads"

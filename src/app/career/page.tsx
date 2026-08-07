@@ -40,7 +40,7 @@ export default async function CareerPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="career" unread={unread} />
+      <SiteHeader memberName={me.name} active="career" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="flex items-end justify-between gap-4">
           <div>

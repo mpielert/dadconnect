@@ -90,7 +90,7 @@ export default async function TravelPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="travel" unread={unread} />
+      <SiteHeader memberName={me.name} active="travel" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <h1 className="font-display text-3xl font-semibold text-ink">
           Travel Sharing

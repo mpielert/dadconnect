@@ -20,6 +20,19 @@ export interface Member {
   share_contact: boolean | null;
   guardian_managed: boolean;
   profile_owner_id: string | null;
+  is_admin: boolean;
+  created_at: string;
+}
+
+export interface Invite {
+  code: string;
+  email: string | null;
+  invited_name: string | null;
+  created_by: string | null;
+  used_by: string | null;
+  used_at: string | null;
+  revoked_at: string | null;
+  expires_at: string | null;
   created_at: string;
 }
 

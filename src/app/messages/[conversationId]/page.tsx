@@ -66,7 +66,7 @@ export default async function ThreadPage({
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="messages" unread={unread} />
+      <SiteHeader memberName={me.name} active="messages" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto flex max-w-2xl flex-col px-6 py-8">
         <Link
           href="/messages"

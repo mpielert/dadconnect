@@ -35,7 +35,7 @@ export default async function CareerRequestsPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="career" unread={unread} />
+      <SiteHeader memberName={me.name} active="career" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <Link
           href="/career"

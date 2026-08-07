@@ -5,6 +5,7 @@ export function SiteHeader({
   memberName,
   active,
   unread = 0,
+  isAdmin = false,
 }: {
   memberName: string;
   active?:
@@ -13,8 +14,10 @@ export function SiteHeader({
     | "crash-pads"
     | "travel"
     | "messages"
-    | "profile";
+    | "profile"
+    | "admin";
   unread?: number;
+  isAdmin?: boolean;
 }) {
   const linkCls = (isActive: boolean) =>
     `rounded-lg px-3 py-1.5 text-sm transition ${
@@ -56,6 +59,11 @@ export function SiteHeader({
           <Link href="/profile" className={linkCls(active === "profile")}>
             My profile
           </Link>
+          {isAdmin && (
+            <Link href="/admin" className={linkCls(active === "admin")}>
+              Admin
+            </Link>
+          )}
           <form action={signOut}>
             <button className="rounded-lg px-3 py-1.5 text-sm text-ink-soft transition hover:text-cardinal">
               Sign out

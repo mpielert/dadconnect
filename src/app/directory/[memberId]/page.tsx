@@ -49,7 +49,7 @@ export default async function MemberProfilePage({
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="directory" unread={unread} />
+      <SiteHeader memberName={me.name} active="directory" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-2xl px-6 py-8">
         <Link
           href="/directory"

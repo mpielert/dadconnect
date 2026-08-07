@@ -25,7 +25,7 @@ export default async function DirectoryPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="directory" unread={unread} />
+      <SiteHeader memberName={me.name} active="directory" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-4xl px-6 py-8">
         <h1 className="font-display text-3xl font-semibold text-ink">
           Directory

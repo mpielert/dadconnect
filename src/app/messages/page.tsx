@@ -64,7 +64,7 @@ export default async function MessagesPage({
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="messages" unread={unread} />
+      <SiteHeader memberName={me.name} active="messages" unread={unread} isAdmin={me.is_admin} />
       <main className="mx-auto max-w-2xl px-6 py-8">
         <h1 className="font-display text-3xl font-semibold text-ink">
           Messages
