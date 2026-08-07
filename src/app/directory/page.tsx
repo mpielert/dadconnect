@@ -1,83 +1,46 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "./actions";
+import { getCurrentMember } from "@/lib/members";
+import { SiteHeader } from "@/components/SiteHeader";
+import { DirectoryBrowser } from "./DirectoryBrowser";
+import type { DirectoryMember } from "@/lib/types";
 
-/**
- * Authed landing inside the app. This is a scaffold placeholder that proves
- * the auth + RLS wiring end to end: it reads from the `member_directory` view,
- * which returns only fields each member has marked shareable (enforced in the
- * database, not here). The real Member Directory UI (Handoff §4 phase 1, §5
- * visual design) is the next build pass.
- */
+const DIRECTORY_COLUMNS =
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id";
+
 export default async function DirectoryPage() {
+  const me = await getCurrentMember();
+  if (!me) redirect("/onboarding");
+
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: members, error } = await supabase
+  const { data, error } = await supabase
     .from("member_directory")
-    .select("member_id, name, is_minor, age, generation, city, role_or_school")
+    .select(DIRECTORY_COLUMNS)
     .order("name");
 
+  const members = (data as DirectoryMember[] | null) ?? [];
+
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <header className="thread-bg -mx-6 mb-8 border-b border-thread/40 bg-paper-raised px-6 py-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-brass">
-              DadConnect
-            </p>
-            <h1 className="mt-1 font-display text-3xl font-semibold text-ink">
-              Directory
-            </h1>
+    <>
+      <SiteHeader memberName={me.name} active="directory" />
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        <h1 className="font-display text-3xl font-semibold text-ink">
+          Directory
+        </h1>
+        <p className="mt-1 text-ink-soft">
+          Everyone in the group. Only fields members choose to share are shown.
+        </p>
+
+        {error ? (
+          <p className="mt-6 rounded-lg border border-cardinal/40 bg-cardinal/5 px-4 py-3 text-sm text-cardinal">
+            Could not load the directory: {error.message}
+          </p>
+        ) : (
+          <div className="mt-6">
+            <DirectoryBrowser members={members} currentMemberId={me.member_id} />
           </div>
-          <form action={signOut}>
-            <button className="rounded-lg border border-thread/50 px-4 py-2 text-sm text-ink-soft transition hover:border-cardinal hover:text-cardinal">
-              Sign out
-            </button>
-          </form>
-        </div>
-      </header>
-
-      {error && (
-        <p className="rounded-lg border border-cardinal/40 bg-cardinal/5 px-4 py-3 text-sm text-cardinal">
-          Could not load the directory: {error.message}
-        </p>
-      )}
-
-      {members && members.length === 0 && (
-        <p className="text-ink-soft">
-          No members yet. Once the roster is seeded, they&apos;ll appear here.
-        </p>
-      )}
-
-      <ul className="space-y-3">
-        {members?.map((m) => (
-          <li
-            key={m.member_id}
-            className="rounded-xl border border-thread/40 bg-paper-raised px-5 py-4"
-          >
-            <div className="flex items-baseline justify-between gap-4">
-              <span className="font-display text-lg font-semibold text-ink">
-                {m.name}
-              </span>
-              <span className="font-mono text-xs text-thread">
-                {m.member_id}
-              </span>
-            </div>
-            <p className="mt-1 font-mono text-xs uppercase tracking-wide text-ink-soft">
-              {m.is_minor
-                ? `minor · age ${m.age ?? "—"}`
-                : [m.generation, m.city, m.role_or_school]
-                    .filter(Boolean)
-                    .join(" · ") || "—"}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </main>
+        )}
+      </main>
+    </>
   );
 }
