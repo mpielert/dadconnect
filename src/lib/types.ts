@@ -54,3 +54,45 @@ export const CONTACT_LABEL: Record<ContactPreference, string> = {
   phone: "Phone",
   none: "No contact",
 };
+
+// ---------------------------------------------------------------------------
+// Career Networking
+// ---------------------------------------------------------------------------
+export type CareerStatus = "pending" | "accepted" | "declined" | "redirected";
+
+export interface CareerResource {
+  member_id: string;
+  opted_in: boolean;
+  industry: string | null;
+  company_or_school: string | null;
+  function_area: string | null;
+  updated_at: string;
+}
+
+export interface CareerRequest {
+  request_id: string;
+  requester_id: string;
+  resource_id: string;
+  ask: string;
+  status: CareerStatus;
+  redirect_note: string | null;
+  outcome_note: string | null;
+  created_at: string;
+}
+
+export const CAREER_STATUS_LABEL: Record<CareerStatus, string> = {
+  pending: "Pending",
+  accepted: "Accepted",
+  declined: "Declined",
+  redirected: "Redirected",
+};
+
+export const CAREER_STATUS_TONE: Record<
+  CareerStatus,
+  "brass" | "cardinal" | "thread" | "neutral"
+> = {
+  pending: "brass",
+  accepted: "thread",
+  declined: "cardinal",
+  redirected: "neutral",
+};
