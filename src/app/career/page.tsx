@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember, getMemberNames } from "@/lib/members";
+import { getUnreadCount } from "@/lib/messaging";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ResourceEditor } from "./ResourceEditor";
 import { ResourceBrowser } from "./ResourceBrowser";
@@ -12,6 +13,8 @@ export type ResourceWithName = CareerResource & { name: string };
 export default async function CareerPage() {
   const me = await getCurrentMember();
   if (!me) redirect("/onboarding");
+
+  const unread = await getUnreadCount();
 
   const supabase = await createClient();
 
@@ -37,7 +40,7 @@ export default async function CareerPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="career" />
+      <SiteHeader memberName={me.name} active="career" unread={unread} />
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="flex items-end justify-between gap-4">
           <div>

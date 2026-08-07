@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember } from "@/lib/members";
+import { getUnreadCount } from "@/lib/messaging";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DirectoryBrowser } from "./DirectoryBrowser";
 import type { DirectoryMember } from "@/lib/types";
@@ -12,6 +13,8 @@ export default async function DirectoryPage() {
   const me = await getCurrentMember();
   if (!me) redirect("/onboarding");
 
+  const unread = await getUnreadCount();
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("member_directory")
@@ -22,7 +25,7 @@ export default async function DirectoryPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="directory" />
+      <SiteHeader memberName={me.name} active="directory" unread={unread} />
       <main className="mx-auto max-w-4xl px-6 py-8">
         <h1 className="font-display text-3xl font-semibold text-ink">
           Directory

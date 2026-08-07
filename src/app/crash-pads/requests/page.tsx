@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember, getMemberNames } from "@/lib/members";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Pill } from "@/components/Pill";
+import { MessageButton } from "@/components/MessageButton";
+import { getUnreadCount } from "@/lib/messaging";
 import {
   HOSTING_REQ_STATUS_LABEL,
   HOSTING_REQ_STATUS_TONE,
@@ -22,12 +24,13 @@ export default async function HostingRequestsPage() {
   if (!me) redirect("/onboarding");
 
   const supabase = await createClient();
-  const [{ data }, names] = await Promise.all([
+  const [{ data }, names, unread] = await Promise.all([
     supabase
       .from("hosting_requests")
       .select("*")
       .order("created_at", { ascending: false }),
     getMemberNames(),
+    getUnreadCount(),
   ]);
 
   const all = (data as HostingRequest[] | null) ?? [];
@@ -37,7 +40,7 @@ export default async function HostingRequestsPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="crash-pads" />
+      <SiteHeader memberName={me.name} active="crash-pads" unread={unread} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <Link
           href="/crash-pads"
@@ -75,9 +78,26 @@ export default async function HostingRequestsPage() {
                       <RequestActions requestId={r.request_id} />
                     </div>
                   ) : (
-                    r.counter_note && (
-                      <NoteLine label="Your counter" text={r.counter_note} />
-                    )
+                    <>
+                      {r.counter_note && (
+                        <NoteLine label="Your counter" text={r.counter_note} />
+                      )}
+                      {(r.status === "accepted" || r.status === "countered") && (
+                        <div className="mt-4 border-t border-thread/30 pt-4">
+                          <p className="mb-2 text-sm text-ink-soft">
+                            {r.status === "accepted"
+                              ? "Message them to arrange the details — this is where you'd share your address."
+                              : "Message them to work out an alternative."}
+                          </p>
+                          <MessageButton
+                            otherId={r.traveler_id}
+                            origin="crash_pad"
+                            originId={r.request_id}
+                            label={`Message ${nameOf(r.traveler_id)}`}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </li>
               ))}
@@ -114,6 +134,17 @@ export default async function HostingRequestsPage() {
                   />
                   {r.counter_note && (
                     <NoteLine label="Counter" text={r.counter_note} />
+                  )}
+                  {(r.status === "accepted" || r.status === "countered") && (
+                    <div className="mt-4 border-t border-thread/30 pt-4">
+                      <MessageButton
+                        otherId={r.host_id}
+                        origin="crash_pad"
+                        originId={r.request_id}
+                        label={`Message ${nameOf(r.host_id)}`}
+                        variant="outline"
+                      />
+                    </div>
                   )}
                 </li>
               ))}

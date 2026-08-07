@@ -179,3 +179,26 @@ export interface TravelReply {
   message: string;
   created_at: string;
 }
+
+// ---------------------------------------------------------------------------
+// Messaging
+// ---------------------------------------------------------------------------
+export type ConversationOrigin = "direct" | "crash_pad" | "career";
+
+export interface Conversation {
+  conversation_id: string;
+  member_a_id: string;
+  member_b_id: string;
+  origin_kind: ConversationOrigin | null;
+  origin_id: string | null;
+  created_at: string;
+}
+
+export interface Message {
+  message_id: string;
+  conversation_id: string;
+  sender_id: string;
+  body: string;
+  read_at: string | null;
+  created_at: string;
+}

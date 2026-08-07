@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember, getMemberNames } from "@/lib/members";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Pill } from "@/components/Pill";
+import { MessageButton } from "@/components/MessageButton";
+import { getUnreadCount } from "@/lib/messaging";
 import {
   CAREER_STATUS_LABEL,
   CAREER_STATUS_TONE,
@@ -17,12 +19,13 @@ export default async function CareerRequestsPage() {
   if (!me) redirect("/onboarding");
 
   const supabase = await createClient();
-  const [{ data }, names] = await Promise.all([
+  const [{ data }, names, unread] = await Promise.all([
     supabase
       .from("career_requests")
       .select("*")
       .order("created_at", { ascending: false }),
     getMemberNames(),
+    getUnreadCount(),
   ]);
 
   const all = (data as CareerRequest[] | null) ?? [];
@@ -32,7 +35,7 @@ export default async function CareerRequestsPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="career" />
+      <SiteHeader memberName={me.name} active="career" unread={unread} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <Link
           href="/career"
@@ -70,9 +73,24 @@ export default async function CareerRequestsPage() {
                       <RequestActions requestId={r.request_id} />
                     </div>
                   ) : (
-                    r.redirect_note && (
-                      <NoteLine label="Your redirect note" text={r.redirect_note} />
-                    )
+                    <>
+                      {r.redirect_note && (
+                        <NoteLine
+                          label="Your redirect note"
+                          text={r.redirect_note}
+                        />
+                      )}
+                      {r.status === "accepted" && (
+                        <div className="mt-4 border-t border-thread/30 pt-4">
+                          <MessageButton
+                            otherId={r.requester_id}
+                            origin="career"
+                            originId={r.request_id}
+                            label={`Message ${nameOf(r.requester_id)}`}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </li>
               ))}
@@ -111,7 +129,14 @@ export default async function CareerRequestsPage() {
                     <NoteLine label="Redirect" text={r.redirect_note} />
                   )}
                   {r.status === "accepted" && (
-                    <div className="mt-4 border-t border-thread/30 pt-4">
+                    <div className="mt-4 space-y-4 border-t border-thread/30 pt-4">
+                      <MessageButton
+                        otherId={r.resource_id}
+                        origin="career"
+                        originId={r.request_id}
+                        label={`Message ${nameOf(r.resource_id)}`}
+                        variant="outline"
+                      />
                       <AddOutcome
                         requestId={r.request_id}
                         current={r.outcome_note}

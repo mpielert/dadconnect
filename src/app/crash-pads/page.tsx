@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember, getDirectoryMap } from "@/lib/members";
+import { getUnreadCount } from "@/lib/messaging";
 import { SiteHeader } from "@/components/SiteHeader";
 import { HostingStatusEditor } from "./HostingStatusEditor";
 import { HostBrowser } from "./HostBrowser";
@@ -18,6 +19,8 @@ export type HostListing = {
 export default async function CrashPadsPage() {
   const me = await getCurrentMember();
   if (!me) redirect("/onboarding");
+
+  const unread = await getUnreadCount();
 
   const supabase = await createClient();
   const [{ data: mine }, { data: openHosts }, dir] = await Promise.all([
@@ -48,7 +51,7 @@ export default async function CrashPadsPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="crash-pads" />
+      <SiteHeader memberName={me.name} active="crash-pads" unread={unread} />
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="flex items-end justify-between gap-4">
           <div>

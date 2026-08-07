@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember } from "@/lib/members";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Pill } from "@/components/Pill";
+import { MessageButton } from "@/components/MessageButton";
+import { getUnreadCount } from "@/lib/messaging";
 import {
   CONTACT_LABEL,
   GENERATION_LABEL,
@@ -39,9 +41,15 @@ export default async function MemberProfilePage({
     member.is_minor && member.profile_owner_id === me.member_id;
   const canEdit = isSelf || isMyWard;
 
+  // Messaging is adults-only, and 'none' means "don't contact me" (spec §3).
+  const canMessage =
+    !isSelf && !member.is_minor && member.contact_preference !== "none";
+
+  const unread = await getUnreadCount();
+
   return (
     <>
-      <SiteHeader memberName={me.name} active="directory" />
+      <SiteHeader memberName={me.name} active="directory" unread={unread} />
       <main className="mx-auto max-w-2xl px-6 py-8">
         <Link
           href="/directory"
@@ -108,14 +116,17 @@ export default async function MemberProfilePage({
             </div>
           )}
 
-          {canEdit && (
-            <div className="mt-8 border-t border-thread/30 pt-5">
-              <Link
-                href="/profile"
-                className="inline-block rounded-lg border border-cardinal/60 px-4 py-2 text-sm font-medium text-cardinal transition hover:bg-cardinal hover:text-paper"
-              >
-                {isSelf ? "Edit my profile" : "Manage this record"}
-              </Link>
+          {(canEdit || canMessage) && (
+            <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-thread/30 pt-5">
+              {canEdit && (
+                <Link
+                  href="/profile"
+                  className="inline-block rounded-lg border border-cardinal/60 px-4 py-2 text-sm font-medium text-cardinal transition hover:bg-cardinal hover:text-paper"
+                >
+                  {isSelf ? "Edit my profile" : "Manage this record"}
+                </Link>
+              )}
+              {canMessage && <MessageButton otherId={member.member_id} />}
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember, getDirectoryMap } from "@/lib/members";
+import { getUnreadCount } from "@/lib/messaging";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Pill } from "@/components/Pill";
 import { NewPostForm } from "./NewPostForm";
@@ -22,6 +23,8 @@ function dateRange(start: string | null, end: string | null): string | null {
 export default async function TravelPage() {
   const me = await getCurrentMember();
   if (!me) redirect("/onboarding");
+
+  const unread = await getUnreadCount();
 
   const supabase = await createClient();
   const [
@@ -87,7 +90,7 @@ export default async function TravelPage() {
 
   return (
     <>
-      <SiteHeader memberName={me.name} active="travel" />
+      <SiteHeader memberName={me.name} active="travel" unread={unread} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <h1 className="font-display text-3xl font-semibold text-ink">
           Travel Sharing
