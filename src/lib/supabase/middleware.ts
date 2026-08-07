@@ -40,7 +40,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const publicPaths = ["/", "/login", "/auth"];
+  // /api/cron/* authenticates with its own bearer secret, not a session.
+  const publicPaths = ["/", "/login", "/auth", "/api/cron"];
   const isPublic = publicPaths.some(
     (p) =>
       request.nextUrl.pathname === p ||
