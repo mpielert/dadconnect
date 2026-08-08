@@ -36,7 +36,7 @@ export default function LoginPage() {
       setMessage(
         error.message?.toLowerCase().includes("not allowed") ||
           error.name === "NotAllowedError"
-          ? "No passkey found on this device. Sign in with your email below — you can turn on Face ID afterwards."
+          ? "No passkey found on this device. Use the email option above — you can turn on Face ID from your profile once you're in."
           : error.message,
       );
       setPasskeyBusy(false);
@@ -81,28 +81,10 @@ export default function LoginPage() {
           Sign in
         </h1>
         <p className="mt-2 text-sm text-ink-soft">
-          Use Face ID if you&apos;ve set it up, or we&apos;ll email you a
-          one-time sign-in link.
+          We&apos;ll email you a one-time sign-in link — no password needed.
         </p>
 
-        <button
-          type="button"
-          onClick={handlePasskey}
-          disabled={passkeyBusy}
-          className="mt-6 w-full rounded-lg border border-cardinal/60 px-4 py-3 font-medium text-cardinal transition hover:bg-cardinal hover:text-paper disabled:opacity-50"
-        >
-          {passkeyBusy ? "Waiting…" : "Sign in with Face ID / passkey"}
-        </button>
-
-        <div className="my-5 flex items-center gap-3">
-          <span className="h-px flex-1 bg-thread/40" />
-          <span className="font-mono text-[10px] uppercase tracking-wider text-thread">
-            or
-          </span>
-          <span className="h-px flex-1 bg-thread/40" />
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <input
             type="email"
             required
@@ -129,6 +111,19 @@ export default function LoginPage() {
             {message}
           </p>
         )}
+
+        <div className="mt-6 border-t border-thread/30 pt-4 text-center">
+          <button
+            type="button"
+            onClick={handlePasskey}
+            disabled={passkeyBusy}
+            className="text-sm text-ink-soft underline underline-offset-2 transition hover:text-cardinal disabled:opacity-50"
+          >
+            {passkeyBusy
+              ? "Waiting for Face ID…"
+              : "Used Face ID here before? Sign in with your passkey"}
+          </button>
+        </div>
       </div>
     </main>
   );
