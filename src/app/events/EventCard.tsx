@@ -134,6 +134,17 @@ export function EventCard({
         </form>
       )}
 
+      {!cancelled && !isPast && (
+        <p className="mt-3">
+          <a
+            href={`/api/events/${event.event_id}/ics`}
+            className="text-xs text-ink-soft underline transition hover:text-cardinal"
+          >
+            Add to calendar
+          </a>
+        </p>
+      )}
+
       {/* Who's coming */}
       <div className="mt-3 space-y-1 text-sm">
         {groups.going.length > 0 && (

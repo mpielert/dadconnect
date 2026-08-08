@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember, getDirectoryMap } from "@/lib/members";
@@ -9,7 +10,14 @@ import type { EventItem, EventRsvp, RsvpResponse } from "@/lib/types";
 
 export type RsvpGroups = Record<RsvpResponse, string[]>;
 
-export default async function EventsPage() {
+export default async function EventsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mine?: string }>;
+}) {
+  const { mine: mineParam } = await searchParams;
+  const onlyMine = mineParam === "1";
+
   const me = await getCurrentMember();
   if (!me) redirect("/onboarding");
 
@@ -50,9 +58,15 @@ export default async function EventsPage() {
     }
   }
 
+  const isMine = (e: EventItem) => {
+    const r = mine.get(e.event_id);
+    return r === "going" || r === "maybe";
+  };
+  const visible = onlyMine ? events.filter(isMine) : events;
+
   const today = new Date().toISOString().slice(0, 10);
-  const upcoming = events.filter((e) => e.event_date >= today);
-  const past = events.filter((e) => e.event_date < today).reverse();
+  const upcoming = visible.filter((e) => e.event_date >= today);
+  const past = visible.filter((e) => e.event_date < today).reverse();
 
   const render = (e: EventItem, isPast: boolean) => (
     <EventCard
@@ -92,7 +106,26 @@ export default async function EventsPage() {
           </div>
         </section>
 
-        <section className="mt-10">
+        <div className="mt-10 flex gap-2">
+          {[
+            { label: "All events", href: "/events", active: !onlyMine },
+            { label: "My events", href: "/events?mine=1", active: onlyMine },
+          ].map((f) => (
+            <Link
+              key={f.href}
+              href={f.href}
+              className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+                f.active
+                  ? "border-cardinal bg-cardinal text-paper"
+                  : "border-thread/50 text-ink-soft hover:border-brass"
+              }`}
+            >
+              {f.label}
+            </Link>
+          ))}
+        </div>
+
+        <section className="mt-6">
           <h2 className="font-display text-xl font-semibold text-ink">
             Upcoming{" "}
             <span className="font-mono text-sm text-thread">
@@ -101,7 +134,9 @@ export default async function EventsPage() {
           </h2>
           {upcoming.length === 0 ? (
             <p className="mt-3 text-ink-soft">
-              Nothing on the calendar yet. Be the one to start something.
+              {onlyMine
+                ? "You haven't said Going or Maybe to any upcoming events."
+                : "Nothing on the calendar yet. Be the one to start something."}
             </p>
           ) : (
             <div className="mt-4 space-y-4">{upcoming.map((e) => render(e, false))}</div>
