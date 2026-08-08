@@ -215,3 +215,42 @@ export interface Message {
   read_at: string | null;
   created_at: string;
 }
+
+// ---------------------------------------------------------------------------
+// Connections Chronology
+// ---------------------------------------------------------------------------
+export type ConnectionContext =
+  | "career"
+  | "crash_pad"
+  | "travel"
+  | "directory"
+  | "other";
+
+export interface Connection {
+  connection_id: string;
+  author_id: string;
+  with_member_id: string;
+  context: ConnectionContext | null;
+  summary: string;
+  connected_on: string | null;
+  created_at: string;
+}
+
+export const CONNECTION_CONTEXT_LABEL: Record<ConnectionContext, string> = {
+  career: "Career",
+  crash_pad: "Crash pad",
+  travel: "Travel",
+  directory: "Met up",
+  other: "Other",
+};
+
+export const CONNECTION_CONTEXT_TONE: Record<
+  ConnectionContext,
+  "brass" | "thread" | "cardinal" | "neutral"
+> = {
+  career: "brass",
+  crash_pad: "thread",
+  travel: "cardinal",
+  directory: "neutral",
+  other: "neutral",
+};
