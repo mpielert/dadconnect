@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -24,6 +24,24 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "CMUDadConnect",
   description: "A private directory and hub for the CMUDadConnect group.",
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  // Full-screen, home-screen install experience on iOS.
+  appleWebApp: {
+    capable: true,
+    title: "DadConnect",
+    statusBarStyle: "default",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#202A26",
 };
 
 export default function RootLayout({

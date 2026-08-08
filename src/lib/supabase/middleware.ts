@@ -41,7 +41,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // /api/cron/* authenticates with its own bearer secret, not a session.
-  const publicPaths = ["/", "/login", "/auth", "/api/cron"];
+  // The web manifest must be publicly fetchable for PWA install to work.
+  const publicPaths = [
+    "/",
+    "/login",
+    "/auth",
+    "/api/cron",
+    "/manifest.webmanifest",
+  ];
   const isPublic = publicPaths.some(
     (p) =>
       request.nextUrl.pathname === p ||
