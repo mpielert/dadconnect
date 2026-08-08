@@ -86,13 +86,18 @@ export async function respondToRequest(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("career_requests")
     .update({ status, redirect_note: redirectNote })
     .eq("request_id", requestId)
-    .eq("resource_id", me.member_id); // only the resource may respond
+    .eq("resource_id", me.member_id) // only the resource may respond
+    .eq("status", "pending") // and only if it hasn't already been answered
+    .select("request_id");
 
   if (error) return { ok: false, error: error.message };
+  if (!updated || updated.length === 0) {
+    return { ok: false, error: "This request was already responded to." };
+  }
 
   revalidatePath("/career/requests");
   return { ok: true };

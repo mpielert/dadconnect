@@ -37,15 +37,19 @@ export default async function ThreadPage({
     convo.member_a_id === me.member_id ? convo.member_b_id : convo.member_a_id;
 
   const [{ data: msgData }, names] = await Promise.all([
+    // Newest 500, then reversed for chronological display. Fetching descending
+    // avoids the hosted PostgREST 1000-row cap silently hiding recent messages
+    // in a very long thread.
     supabase
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true }),
+      .order("created_at", { ascending: false })
+      .limit(500),
     getMemberNames(),
   ]);
 
-  const messages = (msgData as Message[] | null) ?? [];
+  const messages = ((msgData as Message[] | null) ?? []).reverse();
   const otherName = names.get(otherId) ?? otherId;
 
   // Mark their messages read on view (RLS allows this only for the recipient).

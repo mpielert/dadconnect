@@ -92,13 +92,18 @@ export async function respondToHostingRequest(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("hosting_requests")
     .update({ status, counter_note: counterNote })
     .eq("request_id", requestId)
-    .eq("host_id", me.member_id); // only the host may respond
+    .eq("host_id", me.member_id) // only the host may respond
+    .eq("status", "pending") // and only if it hasn't already been answered
+    .select("request_id");
 
   if (error) return { ok: false, error: error.message };
+  if (!updated || updated.length === 0) {
+    return { ok: false, error: "This request was already responded to." };
+  }
 
   revalidatePath("/crash-pads/requests");
   return { ok: true };

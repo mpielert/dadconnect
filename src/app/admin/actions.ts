@@ -53,12 +53,27 @@ export async function inviteMember(
     Date.now() + INVITE_DAYS * 24 * 60 * 60 * 1000,
   ).toISOString();
 
-  const { error: inviteErr } = await supabase.from("invites").insert({
-    email,
-    invited_name: name,
-    created_by: me.member_id,
-    expires_at: expiresAt,
-  });
+  // Avoid piling up duplicate rows when re-inviting the same email: refresh an
+  // existing open invite instead of inserting a second one.
+  const { data: openInvite } = await supabase
+    .from("invites")
+    .select("code")
+    .eq("email", email)
+    .is("used_at", null)
+    .is("revoked_at", null)
+    .maybeSingle();
+
+  const { error: inviteErr } = openInvite
+    ? await supabase
+        .from("invites")
+        .update({ invited_name: name, expires_at: expiresAt })
+        .eq("code", openInvite.code)
+    : await supabase.from("invites").insert({
+        email,
+        invited_name: name,
+        created_by: me.member_id,
+        expires_at: expiresAt,
+      });
   if (inviteErr) return { ok: false, error: inviteErr.message };
 
   // Send the invitation. Not fatal if it fails — the account still works and
