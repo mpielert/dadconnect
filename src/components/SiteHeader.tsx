@@ -14,6 +14,7 @@ export function SiteHeader({
     | "crash-pads"
     | "travel"
     | "connections"
+    | "events"
     | "messages"
     | "profile"
     | "admin";
@@ -51,6 +52,9 @@ export function SiteHeader({
             className={linkCls(active === "connections")}
           >
             Connections
+          </Link>
+          <Link href="/events" className={linkCls(active === "events")}>
+            Events
           </Link>
           <Link
             href="/messages"

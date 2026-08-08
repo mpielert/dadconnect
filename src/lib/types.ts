@@ -255,3 +255,37 @@ export const CONNECTION_CONTEXT_TONE: Record<
   directory: "neutral",
   other: "neutral",
 };
+
+// ---------------------------------------------------------------------------
+// Events / Gatherings
+// ---------------------------------------------------------------------------
+export type RsvpResponse = "going" | "maybe" | "no";
+
+export type EventAudience = "everyone" | "selected";
+
+export interface EventItem {
+  event_id: string;
+  created_by: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  event_date: string;
+  event_time: string | null;
+  audience: EventAudience;
+  cancelled_at: string | null;
+  created_at: string;
+}
+
+export interface EventRsvp {
+  event_id: string;
+  member_id: string;
+  response: RsvpResponse;
+  note: string | null;
+  updated_at: string;
+}
+
+export const RSVP_LABEL: Record<RsvpResponse, string> = {
+  going: "Going",
+  maybe: "Maybe",
+  no: "Can't make it",
+};
