@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember } from "@/lib/members";
-import { str, type ActionState } from "@/lib/form";
+import { intOrNull, str, type ActionState } from "@/lib/form";
 
 /** Create a gathering. */
 export async function createEvent(
@@ -19,9 +19,12 @@ export async function createEvent(
   if (!title) return { ok: false, error: "Give it a title." };
   if (!eventDate) return { ok: false, error: "Pick a date." };
 
-  const selected = str(formData, "audience") === "selected";
+  const audience = str(formData, "audience");
+  if (audience !== "selected" && audience !== "first_gen") {
+    return { ok: false, error: "Pick who it's for." };
+  }
   const invitees = (formData.getAll("invitees") as string[]).filter(Boolean);
-  if (selected && invitees.length === 0) {
+  if (audience === "selected" && invitees.length === 0) {
     return { ok: false, error: "Pick at least one member to invite." };
   }
 
@@ -35,7 +38,7 @@ export async function createEvent(
       location: str(formData, "location"),
       event_date: eventDate,
       event_time: str(formData, "event_time"),
-      audience: selected ? "selected" : "everyone",
+      audience,
     })
     .select("event_id")
     .single();
@@ -43,7 +46,7 @@ export async function createEvent(
     return { ok: false, error: error?.message ?? "Could not create event." };
   }
 
-  if (selected) {
+  if (audience === "selected") {
     const { error: invErr } = await supabase.from("event_invitees").insert(
       invitees.map((member_id) => ({ event_id: created.event_id, member_id })),
     );
@@ -135,12 +138,15 @@ export async function rsvpEvent(
     return { ok: false, error: "Pick a response." };
   }
 
+  const headcount = Math.max(1, intOrNull(formData, "headcount") ?? 1);
+
   const supabase = await createClient();
   const { error } = await supabase.from("event_rsvps").upsert(
     {
       event_id: eventId,
       member_id: me.member_id,
       response,
+      headcount,
       note: str(formData, "note"),
     },
     { onConflict: "event_id,member_id" },

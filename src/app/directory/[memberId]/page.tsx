@@ -7,6 +7,7 @@ import { Pill } from "@/components/Pill";
 import { MessageButton } from "@/components/MessageButton";
 import { getUnreadCount } from "@/lib/messaging";
 import {
+  cmuConnectionLabel,
   CONTACT_LABEL,
   GENERATION_LABEL,
   type ContactPreference,
@@ -14,7 +15,7 @@ import {
 } from "@/lib/types";
 
 const DIRECTORY_COLUMNS =
-  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,departed";
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,cmu_relationship,cmu_relationship_term,cmu_anchor_name,departed";
 
 export default async function MemberProfilePage({
   params,
@@ -71,6 +72,11 @@ export default async function MemberProfilePage({
               <p className="mt-1 font-mono text-xs text-thread">
                 {member.member_id}
               </p>
+              {!member.is_minor && cmuConnectionLabel(member) && (
+                <p className="mt-2 text-sm text-ink-soft">
+                  {cmuConnectionLabel(member)}
+                </p>
+              )}
               {member.departed && (
                 <p className="mt-2 text-sm text-ink-soft">
                   This member has left the community.

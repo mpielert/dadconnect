@@ -23,6 +23,9 @@ export async function createOwnProfile(
   const name = str(formData, "name");
   if (!name) return { ok: false, error: "Name is required." };
 
+  const rel = str(formData, "cmu_relationship");
+  const isOf = rel === "spouse" || rel === "child";
+
   const { error } = await supabase.from("members").insert({
     auth_user_id: user.id,
     name,
@@ -37,6 +40,9 @@ export async function createOwnProfile(
     share_role: bool(formData, "share_role"),
     share_bio: bool(formData, "share_bio"),
     share_contact: bool(formData, "share_contact"),
+    cmu_relationship: rel,
+    cmu_relationship_term: isOf ? str(formData, "cmu_relationship_term") : null,
+    cmu_anchor_name: isOf ? str(formData, "cmu_anchor_name") : null,
   });
 
   if (error) return { ok: false, error: error.message };

@@ -33,6 +33,7 @@ export async function updateProfile(
       share_role: bool(formData, "share_role"),
       share_bio: bool(formData, "share_bio"),
       share_contact: bool(formData, "share_contact"),
+      ...cmuFields(formData),
     })
     .eq("member_id", me.member_id);
 
@@ -42,6 +43,17 @@ export async function updateProfile(
   revalidatePath("/directory");
   revalidatePath(`/directory/${me.member_id}`);
   return { ok: true };
+}
+
+/** CMU-connection fields; term/anchor only kept for spouse/child. */
+function cmuFields(formData: FormData) {
+  const rel = str(formData, "cmu_relationship");
+  const isOf = rel === "spouse" || rel === "child";
+  return {
+    cmu_relationship: rel,
+    cmu_relationship_term: isOf ? str(formData, "cmu_relationship_term") : null,
+    cmu_anchor_name: isOf ? str(formData, "cmu_anchor_name") : null,
+  };
 }
 
 /** Guardian creates a minor record (name + age only). */

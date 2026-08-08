@@ -1,6 +1,7 @@
 "use client";
 
-import type { Member } from "@/lib/types";
+import { useState } from "react";
+import type { CmuRelationship, Member } from "@/lib/types";
 
 const labelCls = "block text-sm font-medium text-ink";
 const inputCls =
@@ -19,6 +20,15 @@ export function ProfileFormFields({
   defaults?: Partial<Member>;
 }) {
   const d = defaults ?? {};
+  const [relationship, setRelationship] = useState<CmuRelationship | "">(
+    d.cmu_relationship ?? "",
+  );
+  const isOf = relationship === "spouse" || relationship === "child";
+  const termOptions =
+    relationship === "spouse"
+      ? ["Spouse", "Wife", "Husband"]
+      : ["Child", "Son", "Daughter"];
+
   return (
     <div className="space-y-5">
       <div>
@@ -34,10 +44,67 @@ export function ProfileFormFields({
         />
       </div>
 
+      <div className="rounded-lg border border-thread/40 p-4">
+        <p className="text-sm font-medium text-ink">
+          How are you connected to CMU?
+        </p>
+        <p className={hintCls}>
+          Helps people place you — especially handy across different last names.
+        </p>
+        <select
+          name="cmu_relationship"
+          value={relationship}
+          onChange={(e) =>
+            setRelationship(e.target.value as CmuRelationship | "")
+          }
+          className={`${inputCls} mt-2`}
+        >
+          <option value="">Prefer not to say</option>
+          <option value="student">I attended CMU</option>
+          <option value="spouse">Spouse of a CMU student</option>
+          <option value="child">Child of a CMU student</option>
+          <option value="other">Other connection</option>
+        </select>
+
+        {isOf && (
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div>
+              <label className={labelCls} htmlFor="cmu_relationship_term">
+                Shown as
+              </label>
+              <select
+                id="cmu_relationship_term"
+                name="cmu_relationship_term"
+                defaultValue={d.cmu_relationship_term ?? termOptions[0]}
+                className={inputCls}
+              >
+                {termOptions.map((t) => (
+                  <option key={t} value={t}>
+                    {t} of…
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className={labelCls} htmlFor="cmu_anchor_name">
+                CMU student&apos;s name
+              </label>
+              <input
+                id="cmu_anchor_name"
+                name="cmu_anchor_name"
+                defaultValue={d.cmu_anchor_name ?? ""}
+                placeholder="e.g. Matt Pielert"
+                className={inputCls}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className={labelCls} htmlFor="generation">
-            Generation
+            Which circle?
           </label>
           <select
             id="generation"
@@ -46,7 +113,7 @@ export function ProfileFormFields({
             className={inputCls}
           >
             <option value="">—</option>
-            <option value="original">Original</option>
+            <option value="original">First generation</option>
             <option value="next_gen">Next Gen</option>
           </select>
         </div>

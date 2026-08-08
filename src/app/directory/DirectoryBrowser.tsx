@@ -26,7 +26,7 @@ export function DirectoryBrowser({
         if (m.generation !== gen) return false;
       }
       if (!q) return true;
-      const haystack = [m.name, m.city, m.role_or_school]
+      const haystack = [m.name, m.city, m.role_or_school, m.cmu_anchor_name]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -60,7 +60,7 @@ export function DirectoryBrowser({
         />
         <div className="flex flex-wrap items-center gap-2">
           {genBtn("all", "All")}
-          {genBtn("original", "Original")}
+          {genBtn("original", "First gen")}
           {genBtn("next_gen", "Next Gen")}
           <label className="ml-1 flex cursor-pointer items-center gap-2 text-sm text-ink-soft">
             <input

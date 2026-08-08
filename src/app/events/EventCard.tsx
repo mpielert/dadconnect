@@ -26,14 +26,18 @@ export function EventCard({
   event,
   organizerName,
   groups,
+  goingHeads,
   myResponse,
+  myHeadcount,
   isCreator,
   isPast,
 }: {
   event: EventItem;
   organizerName: string;
   groups: RsvpGroups;
+  goingHeads: number;
   myResponse: RsvpResponse | null;
+  myHeadcount: number;
   isCreator: boolean;
   isPast: boolean;
 }) {
@@ -76,7 +80,7 @@ export function EventCard({
             <h3 className="font-display text-xl font-semibold text-ink">{event.title}</h3>
             {cancelled && <Pill tone="cardinal">Cancelled</Pill>}
             <Pill tone={event.audience === "selected" ? "brass" : "thread"}>
-              {event.audience === "selected" ? "Invited only" : "Everyone"}
+              {event.audience === "selected" ? "Invited only" : "First-gen"}
             </Pill>
           </div>
           <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-thread">
@@ -94,30 +98,53 @@ export function EventCard({
 
       {/* RSVP control */}
       {!cancelled && !isPast && (
-        <form action={rsvpAction} className="mt-4 flex flex-wrap items-center gap-2 border-t border-thread/30 pt-4">
+        <form action={rsvpAction} className="mt-4 border-t border-thread/30 pt-4">
           <input type="hidden" name="event_id" value={event.event_id} />
-          {RESPONSES.map((r) => (
-            <button
-              key={r}
-              type="submit"
-              name="response"
-              value={r}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                myResponse === r
-                  ? "bg-cardinal text-paper"
-                  : "border border-thread/50 text-ink-soft hover:border-cardinal hover:text-cardinal"
-              }`}
-            >
-              {RSVP_LABEL[r]}
-            </button>
-          ))}
+          <div className="flex flex-wrap items-center gap-2">
+            {RESPONSES.map((r) => (
+              <button
+                key={r}
+                type="submit"
+                name="response"
+                value={r}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  myResponse === r
+                    ? "bg-cardinal text-paper"
+                    : "border border-thread/50 text-ink-soft hover:border-cardinal hover:text-cardinal"
+                }`}
+              >
+                {RSVP_LABEL[r]}
+              </button>
+            ))}
+            <label className="ml-2 flex items-center gap-1.5 text-sm text-ink-soft">
+              Party size
+              <input
+                type="number"
+                name="headcount"
+                min={1}
+                defaultValue={myHeadcount}
+                className="w-16 rounded-lg border border-thread/50 bg-paper px-2 py-1.5 text-ink outline-none focus:border-cardinal"
+              />
+            </label>
+          </div>
+          <p className="mt-1 text-xs text-ink-soft">
+            Include family in your party size — click your response to save it.
+          </p>
           {rsvpState?.error && <span className="text-sm text-cardinal">{rsvpState.error}</span>}
         </form>
       )}
 
       {/* Who's coming */}
       <div className="mt-3 space-y-1 text-sm">
-        <AttendeeLine label="Going" names={groups.going} tone="text-ink" />
+        {groups.going.length > 0 && (
+          <p className="text-ink">
+            <span className="font-mono text-[11px] uppercase tracking-wider text-thread">
+              Going — {goingHeads} {goingHeads === 1 ? "person" : "people"} (
+              {groups.going.length} responding):
+            </span>{" "}
+            {groups.going.join(", ")}
+          </p>
+        )}
         <AttendeeLine label="Maybe" names={groups.maybe} tone="text-ink-soft" />
       </div>
 

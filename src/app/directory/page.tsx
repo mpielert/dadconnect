@@ -7,7 +7,7 @@ import { DirectoryBrowser } from "./DirectoryBrowser";
 import type { DirectoryMember } from "@/lib/types";
 
 const DIRECTORY_COLUMNS =
-  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,departed";
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,cmu_relationship,cmu_relationship_term,cmu_anchor_name,departed";
 
 export default async function DirectoryPage() {
   const me = await getCurrentMember();

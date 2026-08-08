@@ -1,5 +1,6 @@
 export type Generation = "original" | "next_gen";
 export type ContactPreference = "in_app" | "email" | "phone" | "none";
+export type CmuRelationship = "student" | "spouse" | "child" | "other";
 
 /** A full `members` row (only ever your own row or a minor you guardian). */
 export interface Member {
@@ -20,6 +21,9 @@ export interface Member {
   share_contact: boolean | null;
   guardian_managed: boolean;
   profile_owner_id: string | null;
+  cmu_relationship: CmuRelationship | null;
+  cmu_relationship_term: string | null;
+  cmu_anchor_name: string | null;
   is_admin: boolean;
   created_at: string;
 }
@@ -54,13 +58,38 @@ export interface DirectoryMember {
   contact_preference: ContactPreference | null;
   guardian_managed: boolean;
   profile_owner_id: string | null;
+  cmu_relationship: CmuRelationship | null;
+  cmu_relationship_term: string | null;
+  cmu_anchor_name: string | null;
   departed: boolean;
 }
 
 export const GENERATION_LABEL: Record<Generation, string> = {
-  original: "Original",
+  original: "First generation",
   next_gen: "Next Gen",
 };
+
+/** Human-readable "how they connect to CMU", e.g. "Wife of Matt Pielert". */
+export function cmuConnectionLabel(m: {
+  cmu_relationship: CmuRelationship | null;
+  cmu_relationship_term: string | null;
+  cmu_anchor_name: string | null;
+}): string | null {
+  switch (m.cmu_relationship) {
+    case "student":
+      return "CMU student";
+    case "spouse":
+    case "child": {
+      const fallback = m.cmu_relationship === "spouse" ? "Spouse" : "Child";
+      const term = m.cmu_relationship_term || fallback;
+      return m.cmu_anchor_name
+        ? `${term} of ${m.cmu_anchor_name}`
+        : `${term} of a CMU student`;
+    }
+    default:
+      return null;
+  }
+}
 
 export const CONTACT_LABEL: Record<ContactPreference, string> = {
   in_app: "In-app",
@@ -261,7 +290,7 @@ export const CONNECTION_CONTEXT_TONE: Record<
 // ---------------------------------------------------------------------------
 export type RsvpResponse = "going" | "maybe" | "no";
 
-export type EventAudience = "everyone" | "selected";
+export type EventAudience = "selected" | "first_gen";
 
 export interface EventItem {
   event_id: string;
@@ -280,6 +309,7 @@ export interface EventRsvp {
   event_id: string;
   member_id: string;
   response: RsvpResponse;
+  headcount: number;
   note: string | null;
   updated_at: string;
 }

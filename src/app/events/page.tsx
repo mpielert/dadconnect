@@ -33,13 +33,21 @@ export default async function EventsPage() {
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const groupsByEvent = new Map<string, RsvpGroups>();
+  const goingHeads = new Map<string, number>();
   const mine = new Map<string, RsvpResponse>();
+  const myHeads = new Map<string, number>();
   for (const r of rsvps) {
     const g =
       groupsByEvent.get(r.event_id) ?? { going: [], maybe: [], no: [] };
     g[r.response].push(nameOf(r.member_id));
     groupsByEvent.set(r.event_id, g);
-    if (r.member_id === me.member_id) mine.set(r.event_id, r.response);
+    if (r.response === "going") {
+      goingHeads.set(r.event_id, (goingHeads.get(r.event_id) ?? 0) + r.headcount);
+    }
+    if (r.member_id === me.member_id) {
+      mine.set(r.event_id, r.response);
+      myHeads.set(r.event_id, r.headcount);
+    }
   }
 
   const today = new Date().toISOString().slice(0, 10);
@@ -52,7 +60,9 @@ export default async function EventsPage() {
       event={e}
       organizerName={nameOf(e.created_by)}
       groups={groupsByEvent.get(e.event_id) ?? { going: [], maybe: [], no: [] }}
+      goingHeads={goingHeads.get(e.event_id) ?? 0}
       myResponse={mine.get(e.event_id) ?? null}
+      myHeadcount={myHeads.get(e.event_id) ?? 1}
       isCreator={e.created_by === me.member_id}
       isPast={isPast}
     />

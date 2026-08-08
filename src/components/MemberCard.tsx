@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Pill } from "./Pill";
-import { GENERATION_LABEL, type DirectoryMember } from "@/lib/types";
+import {
+  cmuConnectionLabel,
+  GENERATION_LABEL,
+  type DirectoryMember,
+} from "@/lib/types";
 
 export function MemberCard({
   member,
@@ -41,6 +45,9 @@ export function MemberCard({
       <p className="mt-3 font-mono text-xs uppercase tracking-wide text-ink-soft">
         {details.length ? details.join(" · ") : "—"}
       </p>
+      {!member.is_minor && cmuConnectionLabel(member) && (
+        <p className="mt-1 text-sm text-thread">{cmuConnectionLabel(member)}</p>
+      )}
     </Link>
   );
 }

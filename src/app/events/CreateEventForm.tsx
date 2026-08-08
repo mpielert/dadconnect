@@ -12,12 +12,12 @@ export type PickMember = { member_id: string; name: string };
 
 export function CreateEventForm({ members }: { members: PickMember[] }) {
   const [state, formAction] = useActionState(createEvent, null);
-  const [audience, setAudience] = useState<"everyone" | "selected">("everyone");
+  const [audience, setAudience] = useState<"selected" | "first_gen">("selected");
   const ref = useRef<HTMLFormElement>(null);
   useEffect(() => {
     if (state?.ok) {
       ref.current?.reset();
-      setAudience("everyone");
+      setAudience("selected");
     }
   }, [state]);
 
@@ -59,12 +59,12 @@ export function CreateEventForm({ members }: { members: PickMember[] }) {
       <fieldset className="rounded-lg border border-thread/40 p-4">
         <legend className="px-1 text-sm font-medium text-ink">Who&apos;s it for?</legend>
         <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
-          <input type="radio" name="audience" value="everyone" checked={audience === "everyone"} onChange={() => setAudience("everyone")} className="accent-cardinal" />
-          Everyone in the group
-        </label>
-        <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-ink">
           <input type="radio" name="audience" value="selected" checked={audience === "selected"} onChange={() => setAudience("selected")} className="accent-cardinal" />
           Only selected members
+        </label>
+        <label className="mt-2 flex cursor-pointer items-center gap-2 text-sm text-ink">
+          <input type="radio" name="audience" value="first_gen" checked={audience === "first_gen"} onChange={() => setAudience("first_gen")} className="accent-cardinal" />
+          All first-generation CMU students
         </label>
 
         {audience === "selected" && (
