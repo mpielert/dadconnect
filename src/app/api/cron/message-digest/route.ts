@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, listAllAuthUsers } from "@/lib/supabase/admin";
 
 /**
  * Unread-message email digest (Messaging_Spec_v1 §6).
@@ -133,8 +133,13 @@ export async function GET(request: Request) {
     ).map((m) => [m.member_id, m]),
   );
 
+  // auth_user_id -> email, fetched once (was an N+1 getUserById per recipient).
+  const emailByAuthId = new Map<string, string>();
+  for (const u of await listAllAuthUsers(supabase)) {
+    if (u.email) emailByAuthId.set(u.id, u.email);
+  }
+
   let sent = 0;
-  const notifiedMessageIds: string[] = [];
 
   for (const recipientId of recipientIds) {
     if (recentlySent.has(recipientId)) continue;
@@ -142,10 +147,7 @@ export async function GET(request: Request) {
     const member = members.get(recipientId);
     if (!member?.auth_user_id) continue;
 
-    const { data: userData } = await supabase.auth.admin.getUserById(
-      member.auth_user_id,
-    );
-    const email = userData?.user?.email;
+    const email = emailByAuthId.get(member.auth_user_id);
     if (!email) continue;
 
     const entry = perRecipient.get(recipientId)!;
@@ -176,7 +178,15 @@ export async function GET(request: Request) {
     if (!res.ok) continue;
 
     sent++;
-    notifiedMessageIds.push(...entry.messageIds);
+
+    // Mark these messages notified BEFORE recording the throttle, so a failure
+    // here can at worst re-email one recipient — never the whole group. (If we
+    // set the throttle first and this failed, the messages would stay
+    // unnotified and re-send after the throttle expired.)
+    await supabase
+      .from("messages")
+      .update({ notified_at: new Date().toISOString() })
+      .in("message_id", entry.messageIds);
 
     await supabase
       .from("digest_log")
@@ -184,15 +194,6 @@ export async function GET(request: Request) {
         { member_id: recipientId, last_sent_at: new Date().toISOString() },
         { onConflict: "member_id" },
       );
-  }
-
-  // Mark only what we actually emailed about, so throttled members still get
-  // notified on a later run.
-  if (notifiedMessageIds.length) {
-    await supabase
-      .from("messages")
-      .update({ notified_at: new Date().toISOString() })
-      .in("message_id", notifiedMessageIds);
   }
 
   return NextResponse.json({

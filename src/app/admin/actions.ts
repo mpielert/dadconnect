@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, listAllAuthUsers } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/admin";
 import { str, type ActionState } from "@/lib/form";
 
@@ -28,12 +28,9 @@ export async function inviteMember(
 
   const supabase = createAdminClient();
 
-  // Does an account already exist for this email?
-  const { data: existing } = await supabase.auth.admin.listUsers({
-    page: 1,
-    perPage: 1000,
-  });
-  const already = existing?.users?.find(
+  // Does an account already exist for this email? (paginated — no 1000 cap)
+  const existingUsers = await listAllAuthUsers(supabase);
+  const already = existingUsers.find(
     (u) => (u.email ?? "").toLowerCase() === email,
   );
 
@@ -117,7 +114,13 @@ export async function inviteMember(
   };
 }
 
-/** Revoke an invite record (does not delete the account). */
+/**
+ * Revoke an invite. Marks it revoked AND removes the auth account it created,
+ * so the invitee can no longer sign in — otherwise "Revoke" would be cosmetic
+ * (the account inviteMember created stays usable). Only removes the account if
+ * the person hasn't already onboarded into a member row; Revoke is only offered
+ * for not-yet-joined invites anyway.
+ */
 export async function revokeInvite(
   _prev: ActionState,
   formData: FormData,
@@ -129,12 +132,37 @@ export async function revokeInvite(
   if (!code) return { ok: false, error: "Missing invite." };
 
   const supabase = createAdminClient();
+
+  const { data: invite } = await supabase
+    .from("invites")
+    .select("email")
+    .eq("code", code)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("invites")
     .update({ revoked_at: new Date().toISOString() })
     .eq("code", code);
-
   if (error) return { ok: false, error: error.message };
+
+  // Disable access: delete the auth account this invite created, unless the
+  // person has already become a member.
+  if (invite?.email) {
+    const users = await listAllAuthUsers(supabase);
+    const user = users.find(
+      (u) => (u.email ?? "").toLowerCase() === invite.email!.toLowerCase(),
+    );
+    if (user) {
+      const { data: member } = await supabase
+        .from("members")
+        .select("member_id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+      if (!member) {
+        await supabase.auth.admin.deleteUser(user.id);
+      }
+    }
+  }
 
   revalidatePath("/admin");
   return { ok: true };

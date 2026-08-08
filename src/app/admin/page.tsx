@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient, listAllAuthUsers } from "@/lib/supabase/admin";
 import { requireAdmin } from "@/lib/admin";
 import { getCurrentMember } from "@/lib/members";
 import { getUnreadCount } from "@/lib/messaging";
@@ -30,14 +30,11 @@ export default async function AdminPage() {
 
   // An invite counts as accepted once a member row exists for that auth user.
   const claimedEmails = new Set<string>();
-  const { data: users } = await supabase.auth.admin.listUsers({
-    page: 1,
-    perPage: 1000,
-  });
+  const users = await listAllAuthUsers(supabase);
   const onboardedAuthIds = new Set(
     members.map((m) => m.auth_user_id).filter(Boolean) as string[],
   );
-  for (const u of users?.users ?? []) {
+  for (const u of users) {
     if (u.email && onboardedAuthIds.has(u.id)) {
       claimedEmails.add(u.email.toLowerCase());
     }

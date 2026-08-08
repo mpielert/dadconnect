@@ -57,7 +57,7 @@ export async function sendRequest(
     requester_id: me.member_id,
     resource_id: resourceId,
     ask,
-    status: "pending",
+    // status defaults to 'pending'; not settable on insert (RLS column grant)
   });
 
   if (error) return { ok: false, error: error.message };

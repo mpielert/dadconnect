@@ -62,7 +62,7 @@ export async function sendHostingRequest(
     end_date: str(formData, "end_date"),
     headcount: intOrNull(formData, "headcount"),
     context: str(formData, "context"),
-    status: "pending",
+    // status defaults to 'pending'; not settable on insert (RLS column grant)
   });
 
   if (error) return { ok: false, error: error.message };

@@ -1,4 +1,23 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type User } from "@supabase/supabase-js";
+
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * Every auth user, across all pages. listUsers() caps at 1000 per page, so a
+ * single call silently misses accounts past that; this walks every page.
+ */
+export async function listAllAuthUsers(admin: AdminClient): Promise<User[]> {
+  const all: User[] = [];
+  const perPage = 1000;
+  for (let page = 1; ; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    const users = data?.users ?? [];
+    all.push(...users);
+    if (users.length < perPage) break;
+  }
+  return all;
+}
 
 /**
  * Admin (service-role) Supabase client. BYPASSES Row Level Security.
