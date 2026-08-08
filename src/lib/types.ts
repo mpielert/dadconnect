@@ -54,6 +54,7 @@ export interface DirectoryMember {
   contact_preference: ContactPreference | null;
   guardian_managed: boolean;
   profile_owner_id: string | null;
+  departed: boolean;
 }
 
 export const GENERATION_LABEL: Record<Generation, string> = {

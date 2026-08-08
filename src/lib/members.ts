@@ -7,7 +7,7 @@ export async function getDirectoryMap(): Promise<Map<string, DirectoryMember>> {
   const { data } = await supabase
     .from("member_directory")
     .select(
-      "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id",
+      "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,departed",
     );
   const map = new Map<string, DirectoryMember>();
   for (const row of (data as DirectoryMember[] | null) ?? []) {

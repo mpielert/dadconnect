@@ -7,7 +7,7 @@ import { DirectoryBrowser } from "./DirectoryBrowser";
 import type { DirectoryMember } from "@/lib/types";
 
 const DIRECTORY_COLUMNS =
-  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id";
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,departed";
 
 export default async function DirectoryPage() {
   const me = await getCurrentMember();
@@ -21,7 +21,11 @@ export default async function DirectoryPage() {
     .select(DIRECTORY_COLUMNS)
     .order("name");
 
-  const members = (data as DirectoryMember[] | null) ?? [];
+  // Departed members stay in the view (so their name resolves elsewhere) but
+  // don't appear in the browse list.
+  const members = ((data as DirectoryMember[] | null) ?? []).filter(
+    (m) => !m.departed,
+  );
 
   return (
     <>

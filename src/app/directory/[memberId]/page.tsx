@@ -14,7 +14,7 @@ import {
 } from "@/lib/types";
 
 const DIRECTORY_COLUMNS =
-  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id";
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,departed";
 
 export default async function MemberProfilePage({
   params,
@@ -41,9 +41,13 @@ export default async function MemberProfilePage({
     member.is_minor && member.profile_owner_id === me.member_id;
   const canEdit = isSelf || isMyWard;
 
-  // Messaging is adults-only, and 'none' means "don't contact me" (spec §3).
+  // Messaging is adults-only, and 'none' means "don't contact me" (spec §3);
+  // departed members can't be contacted.
   const canMessage =
-    !isSelf && !member.is_minor && member.contact_preference !== "none";
+    !isSelf &&
+    !member.is_minor &&
+    !member.departed &&
+    member.contact_preference !== "none";
 
   const unread = await getUnreadCount();
 
@@ -67,6 +71,11 @@ export default async function MemberProfilePage({
               <p className="mt-1 font-mono text-xs text-thread">
                 {member.member_id}
               </p>
+              {member.departed && (
+                <p className="mt-2 text-sm text-ink-soft">
+                  This member has left the community.
+                </p>
+              )}
             </div>
             <div className="flex flex-col items-end gap-1.5">
               {isSelf && <Pill tone="cardinal">You</Pill>}

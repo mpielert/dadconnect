@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { ProfileEditor } from "./ProfileEditor";
 import { MinorsManager } from "./MinorsManager";
 import { PasskeySetup } from "./PasskeySetup";
+import { LeaveCommunity } from "./LeaveCommunity";
 import type { Member } from "@/lib/types";
 
 export default async function ProfilePage() {
@@ -53,6 +54,10 @@ export default async function ProfilePage() {
           <div className="mt-4">
             <MinorsManager minors={minors} />
           </div>
+        </section>
+
+        <section className="mt-12">
+          <LeaveCommunity />
         </section>
       </main>
     </>
