@@ -43,7 +43,7 @@ export async function GET(
       .replace(/\\/g, "\\\\")
       .replace(/;/g, "\\;")
       .replace(/,/g, "\\,")
-      .replace(/\r?\n/g, "\\n");
+      .replace(/\r\n|\r|\n/g, "\\n"); // any line break, incl. a lone CR
 
   const [y, mo, d] = ev.event_date.split("-").map(Number);
   const ymd = (dt: Date) =>

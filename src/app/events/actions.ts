@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentMember } from "@/lib/members";
 import { intOrNull, str, type ActionState } from "@/lib/form";
 
@@ -50,7 +51,12 @@ export async function createEvent(
     const { error: invErr } = await supabase.from("event_invitees").insert(
       invitees.map((member_id) => ({ event_id: created.event_id, member_id })),
     );
-    if (invErr) return { ok: false, error: invErr.message };
+    if (invErr) {
+      // Don't leave an orphaned invitee-less event. Members have no DELETE on
+      // events (only soft-cancel), so clean up with the service role.
+      await createAdminClient().from("events").delete().eq("event_id", created.event_id);
+      return { ok: false, error: invErr.message };
+    }
   }
 
   revalidatePath("/events");
