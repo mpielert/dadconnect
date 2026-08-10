@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/SubmitButton";
 import type { HostingStatus } from "@/lib/types";
 import { updateHostingStatus } from "./actions";
@@ -15,6 +15,21 @@ export function HostingStatusEditor({
 }) {
   const [state, formAction] = useActionState(updateHostingStatus, null);
 
+  // Controlled fields, kept in sync with what's actually stored. React 19
+  // auto-resets a <form> after its action runs; with uncontrolled fields that
+  // reset snapped the dropdown back to "No" even after a successful save. By
+  // controlling the value and re-syncing when the server sends fresh props
+  // (after revalidatePath), the form always reflects the persisted status.
+  const persistedStatus = status?.status ?? "no";
+  const persistedConstraints = status?.constraints ?? "";
+  const [statusValue, setStatusValue] = useState(persistedStatus);
+  const [constraintsValue, setConstraintsValue] = useState(persistedConstraints);
+
+  useEffect(() => {
+    setStatusValue(persistedStatus);
+    setConstraintsValue(persistedConstraints);
+  }, [persistedStatus, persistedConstraints]);
+
   return (
     <form action={formAction} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -25,7 +40,8 @@ export function HostingStatusEditor({
           <select
             id="status"
             name="status"
-            defaultValue={status?.status ?? "no"}
+            value={statusValue}
+            onChange={(e) => setStatusValue(e.target.value as typeof statusValue)}
             className={inputCls}
           >
             <option value="yes">Yes — happy to host</option>
@@ -44,7 +60,8 @@ export function HostingStatusEditor({
             id="constraints"
             name="constraints"
             placeholder="e.g. couch only · 2 weeks notice · kids welcome"
-            defaultValue={status?.constraints ?? ""}
+            value={constraintsValue}
+            onChange={(e) => setConstraintsValue(e.target.value)}
             className={inputCls}
           />
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/SubmitButton";
 import type { CareerResource } from "@/lib/types";
 import { updateResource } from "./actions";
@@ -16,13 +16,21 @@ export function ResourceEditor({
 }) {
   const [state, formAction] = useActionState(updateResource, null);
 
+  // Controlled so it reflects what's stored. React 19 auto-resets the form
+  // after the action; an uncontrolled checkbox would visibly snap back after a
+  // successful save. Re-sync when the server sends fresh props (revalidatePath).
+  const optedIn = resource?.opted_in ?? false;
+  const [checked, setChecked] = useState(optedIn);
+  useEffect(() => setChecked(optedIn), [optedIn]);
+
   return (
     <form action={formAction} className="space-y-5">
       <label className="flex cursor-pointer items-center gap-3">
         <input
           type="checkbox"
           name="opted_in"
-          defaultChecked={resource?.opted_in ?? false}
+          checked={checked}
+          onChange={(e) => setChecked(e.target.checked)}
           className="h-5 w-5 accent-cardinal"
         />
         <span className="text-sm font-medium text-ink">
