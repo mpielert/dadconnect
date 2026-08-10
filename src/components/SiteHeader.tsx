@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions";
+import { getInboxCount } from "@/lib/inbox";
 
-export function SiteHeader({
+export async function SiteHeader({
   memberName,
   active,
   unread = 0,
@@ -9,6 +10,7 @@ export function SiteHeader({
 }: {
   memberName: string;
   active?:
+    | "inbox"
     | "directory"
     | "career"
     | "crash-pads"
@@ -21,6 +23,8 @@ export function SiteHeader({
   unread?: number;
   isAdmin?: boolean;
 }) {
+  const inboxCount = await getInboxCount();
+
   const linkCls = (isActive: boolean) =>
     `rounded-lg px-3 py-1.5 text-sm transition ${
       isActive ? "bg-paper text-ink" : "text-ink-soft hover:text-ink"
@@ -35,6 +39,17 @@ export function SiteHeader({
           </span>
         </Link>
         <nav className="flex flex-wrap items-center gap-1">
+          <Link
+            href="/inbox"
+            className={`${linkCls(active === "inbox")} inline-flex items-center gap-1.5`}
+          >
+            Inbox
+            {inboxCount > 0 && (
+              <span className="rounded-full bg-cardinal px-1.5 py-0.5 font-mono text-[10px] leading-none text-paper">
+                {inboxCount}
+              </span>
+            )}
+          </Link>
           <Link href="/directory" className={linkCls(active === "directory")}>
             Directory
           </Link>
