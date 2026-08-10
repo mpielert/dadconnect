@@ -14,6 +14,7 @@ export type HostListing = {
   city: string | null;
   status: HostStatus;
   constraints: string | null;
+  isSelf: boolean;
 };
 
 export default async function CrashPadsPage() {
@@ -39,15 +40,18 @@ export default async function CrashPadsPage() {
 
   const myStatus = (mine as HostingStatus | null) ?? null;
 
+  // Include your own listing so you can confirm the group sees your offer —
+  // pinned to the top and marked "You" (no request button for yourself).
   const hosts: HostListing[] = ((openHosts as HostingStatus[] | null) ?? [])
-    .filter((h) => h.member_id !== me.member_id)
     .map((h) => ({
       member_id: h.member_id,
       name: dir.get(h.member_id)?.name ?? h.member_id,
       city: dir.get(h.member_id)?.city ?? null,
       status: h.status,
       constraints: h.constraints,
-    }));
+      isSelf: h.member_id === me.member_id,
+    }))
+    .sort((a, b) => Number(b.isSelf) - Number(a.isSelf));
 
   return (
     <>

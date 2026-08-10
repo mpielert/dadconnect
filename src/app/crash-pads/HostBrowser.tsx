@@ -68,6 +68,7 @@ function HostCard({ host }: { host: HostListing }) {
             <Pill tone={HOST_STATUS_TONE[host.status]}>
               {HOST_STATUS_LABEL[host.status]}
             </Pill>
+            {host.isSelf && <Pill tone="brass">You</Pill>}
           </div>
           <p className="mt-1 font-mono text-xs uppercase tracking-wide text-ink-soft">
             {host.city ?? "City not shared"}
@@ -75,8 +76,13 @@ function HostCard({ host }: { host: HostListing }) {
           {host.constraints && (
             <p className="mt-2 text-sm text-ink-soft">{host.constraints}</p>
           )}
+          {host.isSelf && (
+            <p className="mt-2 text-xs text-ink-soft">
+              This is how your offer appears to the group. Edit it above.
+            </p>
+          )}
         </div>
-        {!state?.ok && (
+        {!host.isSelf && !state?.ok && (
           <button
             onClick={() => setOpen((v) => !v)}
             className="shrink-0 rounded-lg border border-cardinal/60 px-4 py-2 text-sm font-medium text-cardinal transition hover:bg-cardinal hover:text-paper"
