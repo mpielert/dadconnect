@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -20,6 +20,17 @@ export default function LoginPage() {
   );
   const [message, setMessage] = useState("");
   const [passkeyBusy, setPasskeyBusy] = useState(false);
+
+  // A failed sign-in link lands here as ?error=auth. Explain it, rather than
+  // showing a blank sign-in page that looks like nothing happened.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("error") === "auth") {
+      setStatus("error");
+      setMessage(
+        "That sign-in link didn't work — links are one-time and must be opened in the same browser you requested them from (not your email app's built-in browser). Enter your email below for a fresh link, then open it in this browser. Tip: press and hold the link and choose Copy, then paste it into this tab.",
+      );
+    }
+  }, []);
 
   async function handlePasskey() {
     setPasskeyBusy(true);
