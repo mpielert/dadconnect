@@ -24,6 +24,8 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "CMUDadConnect",
   description: "A private directory and hub for the CMUDadConnect group.",
+  robots: { index: false, follow: false }, // private group — not for search
+
   icons: {
     icon: [
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },

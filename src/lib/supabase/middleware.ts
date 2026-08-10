@@ -48,6 +48,7 @@ export async function updateSession(request: NextRequest) {
     "/auth",
     "/api/cron",
     "/manifest.webmanifest",
+    "/robots.txt",
   ];
   const isPublic = publicPaths.some(
     (p) =>
