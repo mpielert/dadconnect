@@ -139,8 +139,7 @@ export default function LoginPage() {
         ) : (
           <>
             <p className="mt-2 text-sm text-ink-soft">
-              Enter the code we emailed you. (The email also has a sign-in link,
-              if you prefer.)
+              Enter the code we emailed you.
             </p>
             <form onSubmit={verifyCode} className="mt-6 space-y-4">
               <input
