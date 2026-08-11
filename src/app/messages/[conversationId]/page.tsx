@@ -5,6 +5,8 @@ import { getCurrentMember, getMemberNames } from "@/lib/members";
 import { getUnreadCount } from "@/lib/messaging";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Composer } from "./Composer";
+import { DeleteMessageButton } from "./DeleteMessageButton";
+import { ConversationActions } from "../ConversationActions";
 import type { Conversation, Message } from "@/lib/types";
 
 const ORIGIN_LABEL: Record<string, string> = {
@@ -52,6 +54,13 @@ export default async function ThreadPage({
   const messages = ((msgData as Message[] | null) ?? []).reverse();
   const otherName = names.get(otherId) ?? otherId;
 
+  const { data: hideRow } = await supabase
+    .from("conversation_hides")
+    .select("archived_at")
+    .eq("conversation_id", conversationId)
+    .maybeSingle();
+  const archived = !!hideRow;
+
   // Mark their messages read on view (RLS allows this only for the recipient).
   const unreadIds = messages
     .filter((m) => !m.read_at && m.sender_id !== me.member_id)
@@ -96,6 +105,14 @@ export default async function ThreadPage({
           </p>
         )}
 
+        <div className="mt-2">
+          <ConversationActions
+            conversationId={conversationId}
+            archived={archived}
+            size="md"
+          />
+        </div>
+
         <div className="mt-6 space-y-3">
           {messages.length === 0 ? (
             <p className="text-ink-soft">
@@ -118,13 +135,19 @@ export default async function ThreadPage({
                     }`}
                   >
                     <p className="whitespace-pre-line text-sm">{m.body}</p>
-                    <p
-                      className={`mt-1 font-mono text-[10px] ${
+                    <div
+                      className={`mt-1 flex items-center gap-3 font-mono text-[10px] ${
                         mine ? "text-paper/70" : "text-thread"
                       }`}
                     >
-                      {new Date(m.created_at).toLocaleString()}
-                    </p>
+                      <span>{new Date(m.created_at).toLocaleString()}</span>
+                      {mine && (
+                        <DeleteMessageButton
+                          messageId={m.message_id}
+                          conversationId={conversationId}
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
               );

@@ -51,3 +51,70 @@ export async function sendMessage(
   revalidatePath("/messages");
   return { ok: true };
 }
+
+/** Delete a whole conversation + its messages (RLS: participants only). */
+export async function deleteConversation(formData: FormData): Promise<void> {
+  const me = await getCurrentMember();
+  if (!me) redirect("/onboarding");
+
+  const conversationId = str(formData, "conversation_id");
+  if (conversationId) {
+    const supabase = await createClient();
+    // Messages cascade via the FK's ON DELETE CASCADE.
+    await supabase.from("conversations").delete().eq("conversation_id", conversationId);
+    revalidatePath("/messages");
+  }
+  redirect("/messages");
+}
+
+/** Hide a conversation from your own list (reversible; RLS: self only). */
+export async function archiveConversation(formData: FormData): Promise<void> {
+  const me = await getCurrentMember();
+  if (!me) redirect("/onboarding");
+
+  const conversationId = str(formData, "conversation_id");
+  if (conversationId) {
+    const supabase = await createClient();
+    await supabase
+      .from("conversation_hides")
+      .upsert(
+        { conversation_id: conversationId, member_id: me.member_id },
+        { onConflict: "conversation_id,member_id" },
+      );
+    revalidatePath("/messages");
+  }
+  redirect("/messages");
+}
+
+/** Restore an archived conversation to your list. */
+export async function unarchiveConversation(formData: FormData): Promise<void> {
+  const me = await getCurrentMember();
+  if (!me) redirect("/onboarding");
+
+  const conversationId = str(formData, "conversation_id");
+  if (conversationId) {
+    const supabase = await createClient();
+    await supabase
+      .from("conversation_hides")
+      .delete()
+      .eq("conversation_id", conversationId)
+      .eq("member_id", me.member_id);
+    revalidatePath("/messages");
+  }
+  redirect("/messages");
+}
+
+/** Delete a single message (RLS: sender only). */
+export async function deleteMessage(formData: FormData): Promise<void> {
+  const me = await getCurrentMember();
+  if (!me) redirect("/onboarding");
+
+  const messageId = str(formData, "message_id");
+  const conversationId = str(formData, "conversation_id");
+  if (messageId) {
+    const supabase = await createClient();
+    await supabase.from("messages").delete().eq("message_id", messageId);
+    if (conversationId) revalidatePath(`/messages/${conversationId}`);
+    revalidatePath("/messages");
+  }
+}
