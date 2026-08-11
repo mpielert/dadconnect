@@ -24,6 +24,7 @@ export interface Member {
   cmu_relationship: CmuRelationship | null;
   cmu_relationship_term: string | null;
   cmu_anchor_name: string | null;
+  photo_path: string | null;
   is_admin: boolean;
   created_at: string;
 }
@@ -61,6 +62,7 @@ export interface DirectoryMember {
   cmu_relationship: CmuRelationship | null;
   cmu_relationship_term: string | null;
   cmu_anchor_name: string | null;
+  photo_path: string | null;
   departed: boolean;
 }
 

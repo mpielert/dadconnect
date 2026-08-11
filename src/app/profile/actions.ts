@@ -179,9 +179,15 @@ export async function leaveCommunity(
       share_contact: false,
       generation: null,
       class_year: null,
+      photo_path: null,
       departed_at: new Date().toISOString(),
     })
     .eq("member_id", me.member_id);
+
+  // Remove their profile photo from storage (best-effort).
+  if (me.photo_path) {
+    await admin.storage.from("avatars").remove([me.photo_path]);
+  }
 
   // Revoke access: delete the auth account (FK on delete set null clears the
   // shell's auth_user_id). They can be re-invited later as a fresh account.

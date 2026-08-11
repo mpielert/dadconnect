@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Pill } from "./Pill";
+import { Avatar } from "./Avatar";
 import {
   cmuConnectionLabel,
   GENERATION_LABEL,
@@ -9,9 +10,11 @@ import {
 export function MemberCard({
   member,
   isSelf,
+  photoUrl,
 }: {
   member: DirectoryMember;
   isSelf: boolean;
+  photoUrl?: string | null;
 }) {
   const details = member.is_minor
     ? [`age ${member.age ?? "—"}`]
@@ -23,9 +26,12 @@ export function MemberCard({
       className="group flex flex-col rounded-xl border border-thread/40 bg-paper-raised p-5 transition hover:border-brass/60 hover:shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
-        <h2 className="font-display text-lg font-semibold text-ink group-hover:text-cardinal">
-          {member.name}
-        </h2>
+        <div className="flex items-center gap-3">
+          <Avatar name={member.name} src={photoUrl} size={44} />
+          <h2 className="font-display text-lg font-semibold text-ink group-hover:text-cardinal">
+            {member.name}
+          </h2>
+        </div>
         <span className="shrink-0 font-mono text-[11px] text-thread">
           {member.member_id}
         </span>

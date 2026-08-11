@@ -9,9 +9,11 @@ type GenFilter = "all" | Generation;
 export function DirectoryBrowser({
   members,
   currentMemberId,
+  photoUrls,
 }: {
   members: DirectoryMember[];
   currentMemberId: string;
+  photoUrls: Record<string, string>;
 }) {
   const [query, setQuery] = useState("");
   const [gen, setGen] = useState<GenFilter>("all");
@@ -87,6 +89,7 @@ export function DirectoryBrowser({
               key={m.member_id}
               member={m}
               isSelf={m.member_id === currentMemberId}
+              photoUrl={photoUrls[m.member_id]}
             />
           ))}
         </div>

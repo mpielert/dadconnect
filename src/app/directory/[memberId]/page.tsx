@@ -4,8 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember } from "@/lib/members";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Pill } from "@/components/Pill";
+import { Avatar } from "@/components/Avatar";
 import { MessageButton } from "@/components/MessageButton";
 import { getUnreadCount } from "@/lib/messaging";
+import { signAvatarUrl } from "@/lib/avatars";
 import {
   cmuConnectionLabel,
   CONTACT_LABEL,
@@ -15,7 +17,7 @@ import {
 } from "@/lib/types";
 
 const DIRECTORY_COLUMNS =
-  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,cmu_relationship,cmu_relationship_term,cmu_anchor_name,departed";
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,cmu_relationship,cmu_relationship_term,cmu_anchor_name,photo_path,departed";
 
 export default async function MemberProfilePage({
   params,
@@ -51,6 +53,7 @@ export default async function MemberProfilePage({
     member.contact_preference !== "none";
 
   const unread = await getUnreadCount();
+  const photoUrl = await signAvatarUrl(member.photo_path);
 
   return (
     <>
@@ -65,7 +68,11 @@ export default async function MemberProfilePage({
 
         <div className="mt-4 rounded-2xl border border-thread/40 bg-paper-raised p-6">
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="flex items-start gap-4">
+              {!member.is_minor && (
+                <Avatar name={member.name} src={photoUrl} size={64} />
+              )}
+              <div>
               <h1 className="font-display text-3xl font-semibold text-ink">
                 {member.name}
               </h1>
@@ -82,6 +89,7 @@ export default async function MemberProfilePage({
                   This member has left the community.
                 </p>
               )}
+              </div>
             </div>
             <div className="flex flex-col items-end gap-1.5">
               {isSelf && <Pill tone="cardinal">You</Pill>}

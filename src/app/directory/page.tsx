@@ -2,12 +2,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentMember } from "@/lib/members";
 import { getUnreadCount } from "@/lib/messaging";
+import { signAvatarUrls } from "@/lib/avatars";
 import { SiteHeader } from "@/components/SiteHeader";
 import { DirectoryBrowser } from "./DirectoryBrowser";
 import type { DirectoryMember } from "@/lib/types";
 
 const DIRECTORY_COLUMNS =
-  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,cmu_relationship,cmu_relationship_term,cmu_anchor_name,departed";
+  "member_id,name,is_minor,age,generation,class_year,city,role_or_school,bio,contact_preference,guardian_managed,profile_owner_id,cmu_relationship,cmu_relationship_term,cmu_anchor_name,photo_path,departed";
 
 export default async function DirectoryPage() {
   const me = await getCurrentMember();
@@ -27,6 +28,14 @@ export default async function DirectoryPage() {
     (m) => !m.departed,
   );
 
+  // Sign the photos in one batch → { member_id: signedUrl }.
+  const signed = await signAvatarUrls(members.map((m) => m.photo_path));
+  const photoUrls: Record<string, string> = {};
+  for (const m of members) {
+    const url = m.photo_path ? signed.get(m.photo_path) : undefined;
+    if (url) photoUrls[m.member_id] = url;
+  }
+
   return (
     <>
       <SiteHeader memberName={me.name} active="directory" unread={unread} isAdmin={me.is_admin} />
@@ -44,7 +53,11 @@ export default async function DirectoryPage() {
           </p>
         ) : (
           <div className="mt-6">
-            <DirectoryBrowser members={members} currentMemberId={me.member_id} />
+            <DirectoryBrowser
+              members={members}
+              currentMemberId={me.member_id}
+              photoUrls={photoUrls}
+            />
           </div>
         )}
       </main>
